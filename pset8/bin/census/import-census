@@ -1,0 +1,55 @@
+#!/usr/bin/env php
+<?php
+
+    // SEE ...INSERT INTO `population`... below to choose correct table
+
+    /*
+     * Import US Census population data into table
+     * Source: http://www.census.gov/popest/data/cities/totals/2015/SUB-EST2015.html
+     * Example:
+     * SUMLEV,STATE,COUNTY,PLACE,COUSUB,CONCIT,PRIMGEO_FLAG,FUNCSTAT,NAME,STNAME,CENSUS2010POP,ESTIMATESBASE2010,POPESTIMATE2010,POPESTIMATE2011,POPESTIMATE2012,POPESTIMATE2013,POPESTIMATE2014,POPESTIMATE2015
+     * 162,01,000,00124,00000,00000,0,A,Abbeville city,Alabama,2688,2688,2682,2686,2649,2634,2622,2620
+     * NAME, STNAME, POPESTIMATE2015 will be $data[8], $data[9], $data[17]
+    */
+    
+    // CS50 Library
+    require("../../vendor/library50-php-5/CS50/CS50.php");
+    CS50::init(__DIR__ . "/../../config.json");
+    
+    // check for path to GeoNames Postal Code file (ex: US.txt)
+    if ($argc != 2)
+    {
+        echo "Syntax: ./import /path/to/SUB-EST2015_ALL.csv\n";
+        return FALSE;
+    }
+    else
+    {
+        echo "Starting...\n";
+        
+        if (is_readable($argv[1]))
+        {
+            // open file for reading
+            $handle = fopen($argv[1], "r");
+            
+            echo "Working...\n";
+            
+            // parse data using tab (\t) delimeter and insert into table
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE)
+            {
+                CS50::query("INSERT INTO `population` (`place`,`state`,`popestimate2015`) VALUES(?,?,?)", $data[8], $data[9], $data[17]); // test changed table to population
+            }
+            
+            // close file
+            fclose($handle);
+            echo "Complete!\n";
+        }
+        else
+        {
+            echo "Error opening file\n";
+            return FALSE;
+        }
+    }
+    
+    return TRUE;
+    
+?>

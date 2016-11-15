@@ -1,0 +1,118 @@
+#!/usr/bin/env php
+<?php
+
+    // CS50 Library
+    require("../../vendor/library50-php-5/CS50/CS50.php");
+    CS50::init(__DIR__ . "/../../config.json");
+    
+    // Load state array
+    $states = array(
+    'AL'=>'Alabama',
+    'AK'=>'Alaska',
+    'AZ'=>'Arizona',
+    'AR'=>'Arkansas',
+    'CA'=>'California',
+    'CO'=>'Colorado',
+    'CT'=>'Connecticut',
+    'DE'=>'Delaware',
+    'DC'=>'District of Columbia',
+    'FL'=>'Florida',
+    'GA'=>'Georgia',
+    'HI'=>'Hawaii',
+    'ID'=>'Idaho',
+    'IL'=>'Illinois',
+    'IN'=>'Indiana',
+    'IA'=>'Iowa',
+    'KS'=>'Kansas',
+    'KY'=>'Kentucky',
+    'LA'=>'Louisiana',
+    'ME'=>'Maine',
+    'MD'=>'Maryland',
+    'MA'=>'Massachusetts',
+    'MI'=>'Michigan',
+    'MN'=>'Minnesota',
+    'MS'=>'Mississippi',
+    'MO'=>'Missouri',
+    'MT'=>'Montana',
+    'NE'=>'Nebraska',
+    'NV'=>'Nevada',
+    'NH'=>'New Hampshire',
+    'NJ'=>'New Jersey',
+    'NM'=>'New Mexico',
+    'NY'=>'New York',
+    'NC'=>'North Carolina',
+    'ND'=>'North Dakota',
+    'OH'=>'Ohio',
+    'OK'=>'Oklahoma',
+    'OR'=>'Oregon',
+    'PA'=>'Pennsylvania',
+    'RI'=>'Rhode Island',
+    'SC'=>'South Carolina',
+    'SD'=>'South Dakota',
+    'TN'=>'Tennessee',
+    'TX'=>'Texas',
+    'UT'=>'Utah',
+    'VT'=>'Vermont',
+    'VA'=>'Virginia',
+    'WA'=>'Washington',
+    'WV'=>'West Virginia',
+    'WI'=>'Wisconsin',
+    'WY'=>'Wyoming',
+    );
+    
+    echo "Syntax: ./census-updatepopid -select|update\n\n";
+    echo "To test use -select, otherwise use -update\n\n";
+    
+    /* 
+    ** SELECT / TEST CODE
+    */
+
+    if ($argc != 2) {
+        echo "You must enter an argument\n";
+        return false;
+    }
+    
+    else if ($argv[1] == "-select")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            $state = $states[$abbr];
+            echo $state;
+            echo "\n";
+            
+            $queryReturn = CS50::query("SELECT places.postal_code, places.place_name, places.admin_name1, places.admin_code1, places.latitude, places.longitude, census.popestimate2015 FROM places JOIN census ON places.place_name = census.place AND places.admin_name1 = census.state AND places.admin_name1 = ? ORDER BY places.place_name ASC", $state);
+            
+            var_dump($queryReturn);
+        }
+    }
+    
+    
+    /* 
+    ** UPDATE
+    */
+    
+    else if ($argv[1] == "-update")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            $state = $states[$abbr];
+            echo $state;
+            echo "\n";
+            
+            $queryReturn = CS50::query("UPDATE places p, census c SET p.populationid = c.id WHERE p.place_name = c.place AND p.admin_name1 = c.state AND p.admin_name1 = ?", $state);
+            
+            var_dump($queryReturn);
+        }
+    }
+    
+    else
+    {
+        echo "Bad Syntax\n";
+        return false;
+    }
+    
+    echo "Closing!\n";
+    
+    
+    return true;
+?>
