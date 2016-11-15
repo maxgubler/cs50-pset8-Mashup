@@ -1,0 +1,157 @@
+#!/usr/bin/env php
+<?php
+
+    /* 
+    ** Fix overlapped coordinates by updating with correct data from datasciencetoolkit
+    */
+
+    // CS50 Library
+    require("../../vendor/library50-php-5/CS50/CS50.php");
+    CS50::init(__DIR__ . "/../../config.json");
+    
+    // Load state array
+    $states = array(
+    'AL'=>'Alabama',
+    'AK'=>'Alaska',
+    'AZ'=>'Arizona',
+    'AR'=>'Arkansas',
+    'CA'=>'California',
+    'CO'=>'Colorado',
+    'CT'=>'Connecticut',
+    'DE'=>'Delaware',
+    'DC'=>'District of Columbia',
+    'FL'=>'Florida',
+    'GA'=>'Georgia',
+    'HI'=>'Hawaii',
+    'ID'=>'Idaho',
+    'IL'=>'Illinois',
+    'IN'=>'Indiana',
+    'IA'=>'Iowa',
+    'KS'=>'Kansas',
+    'KY'=>'Kentucky',
+    'LA'=>'Louisiana',
+    'ME'=>'Maine',
+    'MD'=>'Maryland',
+    'MA'=>'Massachusetts',
+    'MI'=>'Michigan',
+    'MN'=>'Minnesota',
+    'MS'=>'Mississippi',
+    'MO'=>'Missouri',
+    'MT'=>'Montana',
+    'NE'=>'Nebraska',
+    'NV'=>'Nevada',
+    'NH'=>'New Hampshire',
+    'NJ'=>'New Jersey',
+    'NM'=>'New Mexico',
+    'NY'=>'New York',
+    'NC'=>'North Carolina',
+    'ND'=>'North Dakota',
+    'OH'=>'Ohio',
+    'OK'=>'Oklahoma',
+    'OR'=>'Oregon',
+    'PA'=>'Pennsylvania',
+    'RI'=>'Rhode Island',
+    'SC'=>'South Carolina',
+    'SD'=>'South Dakota',
+    'TN'=>'Tennessee',
+    'TX'=>'Texas',
+    'UT'=>'Utah',
+    'VT'=>'Vermont',
+    'VA'=>'Virginia',
+    'WA'=>'Washington',
+    'WV'=>'West Virginia',
+    'WI'=>'Wisconsin',
+    'WY'=>'Wyoming',
+    );
+    
+    // optionally allow the specification of a single state
+    if ($argv[2] != "")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            if ($abbr == $argv[2] || $state == $argv[2])
+            {
+                $tempabbr = $abbr;
+                $tempstate = $state;
+                unset($states);
+                $states = array($tempabbr => $tempstate);
+            }
+        }
+    }
+    
+    
+    // check for proper number of arguments
+    if ($argc < 2 || $argc > 3) {
+        echo "Syntax: ./fix -select|exe (Massachusetts)\n";
+        return false;
+    }
+    
+    // begin selecting rows from table
+    if ($argv[1] == "-select" || $argv[1] == "-exe")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            $state = $states[$abbr];
+            echo $state;
+            echo "\n";
+            
+            $queryReturn = CS50::query("SELECT p1.* FROM `placesinno` p1, `placesinno` p2 WHERE p1.`admin_name1` = ? AND p1.`place_name` != p2.`place_name` AND p1.`latitude` = p2.`latitude` AND p1.`longitude` = p2.`longitude` ORDER BY p1.place_name ASC;", $state);
+
+            var_dump($queryReturn);
+            
+            
+            foreach ($queryReturn as $place)
+            {
+                $p = str_replace(" ", "+", $place['place_name']);
+                $s = str_replace(" ", "+", $place['admin_code1']); //unnecessary
+                
+                    
+                echo "\nhttp://www.datasciencetoolkit.org/maps/api/geocode/json?address={$p}+{$s}\n";
+                
+                
+                $json = file_get_contents("http://www.datasciencetoolkit.org/maps/api/geocode/json?address={$p}+{$s}");
+                    //echo "DUMP JSON\n\n";
+                    //var_dump($json);
+                
+                $obj = (array) json_decode($json);
+                    //echo "DUMP OBJ\n";
+                    //var_dump($obj);
+            
+                $results = (array) $obj["results"][0];
+                    //echo "DUMP RESULTS\n";
+                    //var_dump($results);
+            
+                $geometry = (array) $results["geometry"];
+                    //echo "dump GEOMETRY\n\n";
+                    //var_dump($geometry);
+            
+                $location = (array) $geometry["location"];
+                    //echo "dump LOCATION\n\n";
+                    //var_dump($location);
+            
+                    //echo "\n{$place['place_name']} ({$place['id']})\n";
+                    //echo "\nLatitude: {$location['lat']}, Longitude: {$location['lng']}\n";
+                
+                // update the table with the new/correct data
+                if ($argv[1] == "-exe")
+                {
+                    echo "Previous data: {$place['latitude']} , {$place['longitude']} , {$place['id']}\n";
+                    CS50::query("UPDATE placesinno p SET p.latitude = ? , p.longitude = ? WHERE p.id = ?", $location['lat'], $location['lng'], $place['id']);
+                    echo "Updated Data: {$location['lat']} , {$location['lng']} , {$place['id']}\n";
+                    echo "Updated table!\n\n";
+                }
+            }
+            
+        }
+    }
+    else
+    {
+        // error check
+        echo "Syntax: ./fix -select|exe (Massachusetts) <-State is optional";
+        return false;
+    }
+    
+    echo "Closing!\n";
+    
+    return true;
+?>

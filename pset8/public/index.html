@@ -16,6 +16,9 @@ A mashup of Google Maps and Google News.
 
         <!-- http://getbootstrap.com/ -->
         <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+        
+        <!-- http://jqueryui.com/ -->
+        <link href="/css/jquery-ui.css" rel="stylesheet"/>
 
         <!-- app's own CSS -->
         <link href="/css/styles.css" rel="stylesheet"/>
@@ -25,27 +28,32 @@ A mashup of Google Maps and Google News.
 
         <!-- http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.10/ -->
         <script src="/js/markerwithlabel_packed.js"></script>
-
+        
         <!-- http://jquery.com/ -->
         <script src="/js/jquery-1.11.3.min.js"></script>
-
+        
         <!-- http://getbootstrap.com/ -->
+        <!-- bootstrap before jqueryUI -->
         <script src="/js/bootstrap.min.js"></script>
+        
+        <!-- http://jqueryui.com/ -->
+        <script src="/js/jquery-ui.js"></script>
 
         <!-- http://underscorejs.org/ -->
         <script src="/js/underscore-min.js"></script>
 
         <!-- https://github.com/twitter/typeahead.js/ -->
         <script src="/js/typeahead.jquery.min.js"></script>
-
+        
         <!-- app's own JavaScript -->
         <script src="/js/scripts.js"></script>
+
 
         <title>Mashup</title>
 
     </head>
     <body>
-
+        
         <!-- fill viewport -->
         <div class="container-fluid">
 
@@ -58,8 +66,25 @@ A mashup of Google Maps and Google News.
                     <label class="sr-only" for="q">City, State, Postal Code</label>
                     <input class="form-control" id="q" placeholder="City, State, Postal Code" type="text"/>
                 </div>
+                <!-- NEW FEATURE: Result Display Radio Button (Highest Population or Random) -->
+                <div class="form-group" id="displayradio">
+                    <input class="form-inline" type="radio" name="resultdisplay" value="pop" id="pop" checked="checked" title="Sort by Population"/>
+                    <label for="pop"><span>Population</span></label>
+                    <br />
+                    <input class="form-inline" type="radio" name="resultdisplay" value="rand" id="rand" title="Randomize Markers"/>
+                    <label for="rand"><span>Randomize</span></label>
+                </div>
+                <!-- end new feature -->
             </form>
+            
+            <button id="opener" class="ui-button ui-corner-all ui-widget">
+	            <span id="changelog">Changelog</span>
+            </button>
+                
+            <div id="dialog" title="Changelog / Features">
+                <p id="readme"></p>
+            </div>
+            
         </div>
-
     </body>
 </html>

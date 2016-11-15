@@ -1,0 +1,163 @@
+#!/usr/bin/env php
+<?php
+
+    // CS50 Library
+    require("../../vendor/library50-php-5/CS50/CS50.php");
+    CS50::init(__DIR__ . "/../../config.json");
+    
+    // Load state array
+    $states = array(
+    'AL'=>'Alabama',
+    'AK'=>'Alaska',
+    'AZ'=>'Arizona',
+    'AR'=>'Arkansas',
+    'CA'=>'California',
+    'CO'=>'Colorado',
+    'CT'=>'Connecticut',
+    'DE'=>'Delaware',
+    'DC'=>'District of Columbia',
+    'FL'=>'Florida',
+    'GA'=>'Georgia',
+    'HI'=>'Hawaii',
+    'ID'=>'Idaho',
+    'IL'=>'Illinois',
+    'IN'=>'Indiana',
+    'IA'=>'Iowa',
+    'KS'=>'Kansas',
+    'KY'=>'Kentucky',
+    'LA'=>'Louisiana',
+    'ME'=>'Maine',
+    'MD'=>'Maryland',
+    'MA'=>'Massachusetts',
+    'MI'=>'Michigan',
+    'MN'=>'Minnesota',
+    'MS'=>'Mississippi',
+    'MO'=>'Missouri',
+    'MT'=>'Montana',
+    'NE'=>'Nebraska',
+    'NV'=>'Nevada',
+    'NH'=>'New Hampshire',
+    'NJ'=>'New Jersey',
+    'NM'=>'New Mexico',
+    'NY'=>'New York',
+    'NC'=>'North Carolina',
+    'ND'=>'North Dakota',
+    'OH'=>'Ohio',
+    'OK'=>'Oklahoma',
+    'OR'=>'Oregon',
+    'PA'=>'Pennsylvania',
+    'RI'=>'Rhode Island',
+    'SC'=>'South Carolina',
+    'SD'=>'South Dakota',
+    'TN'=>'Tennessee',
+    'TX'=>'Texas',
+    'UT'=>'Utah',
+    'VT'=>'Vermont',
+    'VA'=>'Virginia',
+    'WA'=>'Washington',
+    'WV'=>'West Virginia',
+    'WI'=>'Wisconsin',
+    'WY'=>'Wyoming',
+    );
+    
+
+    if ($argv[3] != "")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            if ($abbr == $argv[3] || $state == $argv[3])
+            {
+                $tempabbr = $abbr;
+                $tempstate = $state;
+                unset($states);
+                $states = array($tempabbr => $tempstate);
+            }
+        }
+    }
+    
+    
+    echo "Syntax: ./censusdbstrip -lowpop|id|both -select|del (State)\n\n";
+    echo "Choose to remove low population duplicates (lowpop) or high id duplicates (id)\n";
+    echo "To test use -select, otherwise use -del\n\n";
+    echo "Warning: Only run id after having fully run lowpop\n";
+    
+    /* 
+    ** FIRST: Remove duplicates (based on name, state) with lower population
+    */
+
+    if ($argc < 3 || $argc > 4) {
+        echo "You must enter two arguments\n";
+        return false;
+    }
+    
+    if ($argv[1] == "-lowpop" || $argv[1] == "-both")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            echo "Assessing lower population duplicates...\n";
+            $state = $states[$abbr];
+            echo $state;
+            echo "\n";
+            
+            // Test with selection (To delete, replace SELECT c1.* FROM... with DELETE c1 FROM...)
+            if ($argv[2] == "-select")
+            {
+                $queryReturn = CS50::query("SELECT c1.* FROM population c1, population c2 WHERE c1.place = c2.place AND c1.state = ? AND c2.state = ? AND c1.popestimate2015 < c2.popestimate2015 ORDER BY c1.place;", $state, $state);
+            }
+            else if ($argv[2] == "-del")
+            {
+                $queryReturn = CS50::query("DELETE c1 FROM population c1, population c2 WHERE c1.place = c2.place AND c1.state = ? AND c2.state = ? AND c1.popestimate2015 < c2.popestimate2015;", $state, $state);
+            }
+            else
+            {
+                echo "Specify -select or -del";
+                return false;
+            }
+            
+            var_dump($queryReturn);
+        }
+    }
+    
+    
+    /* 
+    ** NEXT: Remove remaining duplicates with higher id
+    */
+    
+    if ($argv[1] == "-id" || $argv[1] == "-both")
+    {
+        foreach ($states as $abbr => $state)
+        {
+            echo "Assessing higher id duplicates...\n";
+            $state = $states[$abbr];
+            echo $state;
+            echo "\n";
+            
+            // Test with selection (To delete, replace SELECT c1.* FROM... with DELETE c1 FROM...)
+            if ($argv[2] == "-select")
+            {
+                $queryReturn = CS50::query("SELECT c1.* FROM population c1, population c2 WHERE c1.place = c2.place AND c1.state = ? AND c2.state = ? AND c1.id > c2.id;", $state, $state);
+            }
+            else if ($argv[2] == "-del")
+            {
+                $queryReturn = CS50::query("DELETE c1 FROM population c1, population c2 WHERE c1.place = c2.place AND c1.state = ? AND c2.state = ? AND c1.id > c2.id;", $state, $state);
+            }
+            else
+            {
+                echo "Specify -select or -del\n";
+                return false;
+            }
+            
+            var_dump($queryReturn);
+        }
+    }
+    else
+    {
+        echo "Bad Syntax\n";
+        return false;
+    }
+    
+    echo "Closing!\n";
+    
+    
+    return true;
+?>

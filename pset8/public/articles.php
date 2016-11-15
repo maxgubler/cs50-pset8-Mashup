@@ -8,7 +8,7 @@
         http_response_code(400);
         exit;
     }
-
+    
     // get geography's articles
     $articles = lookup($_GET["geo"]);
 
