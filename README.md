@@ -25,6 +25,8 @@ DISPLAY MARKERS BASED UPON HIGHEST POPULATION SIZE (rather than semi-random)
     -Linked population table with places table (placesinno) via `id` and `populationid` (updatepopid)
         -See /bin/census/readme.txt for more information
         
+![Population Size Screenshot](http://i.imgur.com/P8MbUuU.gif)
+        
 MARKER DISPLAY SELECTOR - Radio buttons
     -By population (Set as new default)
     -Random (Original behavior)
